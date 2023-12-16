@@ -1,34 +1,29 @@
-const fs = require('node:fs');
-const readline = require('node:readline');
+const { readlineReducer } = require('../utils/read-line-reducer');
 
-(async function () {
-    const rl = readline.createInterface({
-        input: fs.createReadStream('day-4/input.txt'),
-        crlfDelay: Infinity,
-    })
+const initialValue = {}
 
-    const cardInstances = {}
+readlineReducer("day-4/input.txt", (cardInstances, line) => {
+    const [cardHeader, cardDetail] = line.trim().split(':')
+    const cardNumber = parseInt(cardHeader.substring(cardHeader.indexOf(' '), cardHeader.length).trim())
 
-    for await (const line of rl) {
-        const [cardHeader, cardDetail] = line.trim().split(':')
-        const cardNumber = parseInt(cardHeader.substring(cardHeader.indexOf(' '), cardHeader.length).trim())
+    const [leftSide, rightSide] = cardDetail.trim().split('|')
+    const myNumbers = leftSide.trim().split(' ').filter(Boolean)
+    const winningNumbers = new Set(rightSide.trim().split(' ').filter(Boolean))
+    const matchingNumbers = myNumbers.filter((myNumber) => winningNumbers.has(myNumber))
 
-        const [leftSide, rightSide] = cardDetail.trim().split('|')
-        const myNumbers = leftSide.trim().split(' ').filter(Boolean)
-        const winningNumbers = new Set(rightSide.trim().split(' ').filter(Boolean))
-        const matchingNumbers = myNumbers.filter((myNumber) => winningNumbers.has(myNumber))
+    // original card
+    cardInstances[cardNumber] = (cardInstances[cardNumber] || 0) + 1
 
-        // original card
-        cardInstances[cardNumber] = (cardInstances[cardNumber] || 0) + 1
-
-        // card copies
-        for (let i = 0; i < cardInstances[cardNumber]; i++) {
-            matchingNumbers.forEach((_, j) => {
-                let cardIndex = cardNumber + j + 1
-                cardInstances[cardIndex] = (cardInstances[cardIndex] || 0) + 1
-            })
-        }
+    // card copies
+    for (let i = 0; i < cardInstances[cardNumber]; i++) {
+        matchingNumbers.forEach((_, j) => {
+            let cardIndex = cardNumber + j + 1
+            cardInstances[cardIndex] = (cardInstances[cardIndex] || 0) + 1
+        })
     }
+    
+    return cardInstances
+}, initialValue).then(cardInstances => {
     const totalCards = Object.values(cardInstances).reduce((total, count) => total + count, 0)
     console.log(totalCards)
-})()
+})

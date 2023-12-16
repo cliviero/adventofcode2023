@@ -1,26 +1,18 @@
-const fs = require('node:fs');
-const readline = require('node:readline');
+const { readlineReducer } = require('../utils/read-line-reducer');
 
-(async function () {
-    const rl = readline.createInterface({
-        input: fs.createReadStream('day-1/input.txt'),
-        crlfDelay: Infinity,
-    })
+const initialValue = 0
 
-    let calibrationValuesSum = 0
-    for await (const line of rl) {
-
-        let firstNumber
-        let lastNumber
-        [...line].forEach((char) => {
-            if (!isNaN(char)) {
-                if (!firstNumber) {
-                    firstNumber = char
-                }
-                lastNumber = char
+readlineReducer("day-1/input.txt", (calibrationValuesSum, line) => {
+    let firstNumber
+    let lastNumber
+    
+    [...line].forEach((char) => {
+        if (!isNaN(char)) {
+            if (!firstNumber) {
+                firstNumber = char
             }
-        })
-        calibrationValuesSum += parseInt(firstNumber + lastNumber)
-    }
-    console.log(calibrationValuesSum)
-})()
+            lastNumber = char
+        }
+    })
+    return calibrationValuesSum += parseInt(firstNumber + lastNumber)
+}, initialValue).then(console.log)

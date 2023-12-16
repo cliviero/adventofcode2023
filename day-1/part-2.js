@@ -1,34 +1,29 @@
 const fs = require('node:fs');
 const readline = require('node:readline');
 
-(async function () {
-    const rl = readline.createInterface({
-        input: fs.createReadStream('day-1/input.txt'),
-        crlfDelay: Infinity,
-    })
+const { readlineReducer } = require('../utils/read-line-reducer');
 
-    let calibrationValuesSum = 0
-    for await (const line of rl) {
+const initialValue = 0
 
-        let calibrationValue = createCalibrationValue()
-        let currentWord = '';
-        [...line].forEach((char) => {
-            if (!isNaN(char)) {
-                calibrationValue.setValue(char)
-            } else {
-                currentWord += char
+readlineReducer("day-1/input.txt", (calibrationValuesSum, line) => {
+    let calibrationValue = createCalibrationValue()
+    let currentWord = '';
+    
+    [...line].forEach((char) => {
+        if (!isNaN(char)) {
+            calibrationValue.setValue(char)
+        } else {
+            currentWord += char
 
-                const charNumber = getCharNumberFromWord(currentWord)
-                if (charNumber) {
-                    calibrationValue.setValue(charNumber)
-                    currentWord = ''
-                }
+            const charNumber = getCharNumberFromWord(currentWord)
+            if (charNumber) {
+                calibrationValue.setValue(charNumber)
+                currentWord = ''
             }
-        })
-        calibrationValuesSum += parseInt(calibrationValue.getValue())
-    }
-    console.log(calibrationValuesSum)
-})()
+        }
+    })
+    return calibrationValuesSum += parseInt(calibrationValue.getValue())
+}, initialValue).then(console.log)
 
 function createCalibrationValue() {
 

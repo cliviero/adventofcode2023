@@ -1,40 +1,31 @@
-const fs = require('node:fs');
-const readline = require('node:readline');
+const { readlineReducer } = require('../utils/read-line-reducer');
 
-(async function () {
-    const rl = readline.createInterface({
-        input: fs.createReadStream('day-2/input.txt'),
-        crlfDelay: Infinity,
-    })
+const initialValue = 0
 
-    let powerSum = 0
-    for await (const line of rl) {
+readlineReducer("day-2/input.txt", (powerSum, line) => {
+    const [_, gameRecord] = line.trim().split(':')
 
-        const [_, gameRecord] = line.trim().split(':')
+    let minimumRedCubeQty = 1
+    let minimumGreenCubeQty = 1
+    let minimumBlueCubeQty = 1
 
-        let minimumRedCubeQty = 1
-        let minimumGreenCubeQty = 1
-        let minimumBlueCubeQty = 1
+    gameRecord.trim().split(';').forEach((gameSet) => {
+        gameSet.trim().split(',').forEach((colorCubes) => {
+            const [cubeQtyStr, cubeColor] = colorCubes.trim().split(' ')
+            const cubeQty = parseInt(cubeQtyStr)
 
-        gameRecord.trim().split(';').forEach((gameSet) => {
-            gameSet.trim().split(',').forEach((colorCubes) => {
-                const [cubeQtyStr, cubeColor] = colorCubes.trim().split(' ')
-                const cubeQty = parseInt(cubeQtyStr)
+            if (cubeColor === 'red' && cubeQty > minimumRedCubeQty) {
+                minimumRedCubeQty = cubeQty
+            }
 
-                if (cubeColor === 'red' && cubeQty > minimumRedCubeQty) {
-                    minimumRedCubeQty = cubeQty
-                }
+            if (cubeColor === 'green' && cubeQty > minimumGreenCubeQty) {
+                minimumGreenCubeQty = cubeQty
+            }
 
-                if (cubeColor === 'green' && cubeQty > minimumGreenCubeQty) {
-                    minimumGreenCubeQty = cubeQty
-                }
-
-                if (cubeColor === 'blue' && cubeQty > minimumBlueCubeQty) {
-                    minimumBlueCubeQty = cubeQty
-                }
-            })
+            if (cubeColor === 'blue' && cubeQty > minimumBlueCubeQty) {
+                minimumBlueCubeQty = cubeQty
+            }
         })
-        powerSum += minimumRedCubeQty * minimumGreenCubeQty * minimumBlueCubeQty
-    }
-    console.log(powerSum)
-})()
+    })
+    return powerSum += minimumRedCubeQty * minimumGreenCubeQty * minimumBlueCubeQty
+}, initialValue).then(console.log)

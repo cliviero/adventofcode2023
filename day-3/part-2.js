@@ -1,17 +1,10 @@
-const fs = require('node:fs');
-const readline = require('node:readline');
+const { readlineReducer } = require('../utils/read-line-reducer');
 
-(async function () {
-    const rl = readline.createInterface({
-        input: fs.createReadStream('day-3/input.txt'),
-        crlfDelay: Infinity,
-    })
+const initialValue = []
 
-    const linesArray = []
-    for await (const line of rl) {
-        linesArray.push(line)
-    }
-
+readlineReducer("day-3/input.txt", (linesArray, line) => (
+    [...linesArray, line]
+), initialValue).then(linesArray => {
     let gearRatiosSum = 0
 
     linesArray.forEach((line, lineIndex) => {
@@ -22,8 +15,7 @@ const readline = require('node:readline');
         })
     })
     console.log(gearRatiosSum)
-})()
-
+})
 
 const directions = [
     { x1: -1, y1: -1, x2: 1, y2: -1 }, // Top Left && Top Right
