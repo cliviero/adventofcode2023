@@ -5,8 +5,7 @@ readlineReducer("day-10/input.txt", (pipesMatrix, line) => (
 ), []).then(pipesMatrix => {
     const startingPoint = getStartingPoint(pipesMatrix)
     const giantLoopFromStartingPoint = findGiantLoopFromStartingPoint(pipesMatrix, startingPoint)
-    console.log((giantLoopFromStartingPoint.getSteps() + 1) / 2)
-    console.log(giantLoopFromStartingPoint.getLoop())
+    console.log(giantLoopFromStartingPoint.countTilesEnclosedByTheLoop(startingPoint[0], startingPoint[1]))
 })
 
 function getStartingPoint(linesArray) {
@@ -65,8 +64,7 @@ function findGiantLoopFromStartingPoint(pipesMatrix, startingPoint) {
         createLoop(Directions.EAST)
     ]
 
-    const giantLoopSteps = Math.max(...loops.map(loop => { 
-        while (loop.move());
+    const giantLoopSteps = Math.max(...loops.map(loop => {
         return loop.getSteps()
     }))
 
@@ -75,47 +73,44 @@ function findGiantLoopFromStartingPoint(pipesMatrix, startingPoint) {
     function createLoop(startingDirection) {
 
         const loop = pipesMatrix.map(pipesLine => [...pipesLine].map(_ => '.'))
+
+        let currentPoint = startingPoint
+        let currentDirection = startingDirection
         let steps = 0
-        let currentPosition = startingPoint
-        let direction = startingDirection
 
-        move()
+        while (
+            currentPoint[0] >= 0 &&
+            currentPoint[1] >= 0 &&
+            currentPoint[1] < pipesMatrix.length &&
+            currentPoint[0] < pipesMatrix[currentPoint[1]].length
+        ) {
+            const newPoint = [currentPoint[0] + currentDirection[0], currentPoint[1] + currentDirection[1]]
 
-        function move() {
+            const pipe = pipesMatrix[newPoint[1]][newPoint[0]]
 
-            const newPosition = [currentPosition[0] + direction[0], currentPosition[1] + direction[1]]
-
-            if (newPosition[0] < 0 || newPosition[1] < 0 || newPosition[1] >= pipesMatrix.length || newPosition[0] >= pipesMatrix[newPosition[1]].length) {
-                return false // Out of bounds
-            }
-
-            const pipe = pipesMatrix[newPosition[1]][newPosition[0]]
-
-            if (pipes[pipe] && pipes[pipe][direction]) {
-                steps++;
-                loop[newPosition[1]][newPosition[0]] = pipe
-                currentPosition = newPosition;
-                direction = pipes[pipe][direction];
-                return true;
+            if (pipes[pipe] && pipes[pipe][currentDirection]) {
+                loop[newPoint[1]][newPoint[0]] = '#'
+                currentPoint = newPoint
+                currentDirection = pipes[pipe][currentDirection]
+                steps++
             } else if (pipe === '.') {
-                return false; // Ground
+                break // Ground
+            } else {
+                break // Unknown pipe
             }
-
-            return false; // Unknown pipe
         }
 
         function getSteps() {
             return steps
         }
 
-        function getLoop() {
-            return loop
+        function countTilesEnclosedByTheLoop(x, y) {
+            return { x, y }
         }
 
         return {
-            move,
             getSteps,
-            getLoop
+            countTilesEnclosedByTheLoop
         }
     }
 }
